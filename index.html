@@ -14,10 +14,11 @@ input{width:100%;height:50px;border:1px solid #B9C8CB;border-radius:12px;padding
 .b{display:flex;gap:10px;flex-wrap:wrap}
 .b button,.b a{flex:1;min-width:140px;height:48px;border-radius:12px;border:1.5px solid #00606B;background:#fff;color:#00606B;font-size:15px;font-weight:700;display:flex;align-items:center;justify-content:center;text-decoration:none;cursor:pointer}
 .b .p{background:#00606B;color:#fff}
-.fi{background:#fff;border:1px solid #C9D6D8;border-radius:12px;overflow:hidden}.fh{background:#00606B;color:#fff;padding:10px 14px;display:flex;flex-direction:column;gap:2px}.fh b{font-size:18px}.fh span{font-size:13px;opacity:.92}.fb{padding:12px 14px;display:flex;gap:14px;flex-wrap:wrap}.fb img{width:240px;max-width:100%;height:auto;align-self:flex-start;margin:auto}.sp{flex:1;min-width:240px}.sp div{display:flex;justify-content:space-between;gap:12px;padding:6px 8px;font-size:14px}.sp div:nth-child(odd){background:#EEF3F3}.sp span{color:#44575C}.sp b{text-align:right}.ac{padding:0 14px 12px;font-size:13px;line-height:1.4;color:#2A3C41}.n{font-size:13px;color:#44575C}.t{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:#14262A;color:#fff;padding:10px 16px;border-radius:10px;display:none}
+.fi{background:#fff;border:1px solid #C9D6D8;border-radius:12px;overflow:hidden}.fh{background:#00606B;color:#fff;padding:10px 14px;display:flex;flex-direction:column;gap:2px}.fh b{font-size:18px}.fh span{font-size:13px;opacity:.92}.fb{padding:12px 14px;display:flex;gap:14px;flex-wrap:wrap}.fb img{width:240px;max-width:100%;height:auto;align-self:flex-start;margin:auto}.sp{flex:1;min-width:240px}.sp div{display:flex;justify-content:space-between;gap:12px;padding:6px 8px;font-size:14px}.sp div:nth-child(odd){background:#EEF3F3}.sp span{color:#44575C}.sp b{text-align:right}.ac{padding:0 14px 12px;font-size:13px;line-height:1.4;color:#2A3C41}.cats{display:grid;grid-template-columns:1fr 1fr;gap:10px}.cat{background:#fff;border:1px solid #C9D6D8;border-radius:12px;overflow:hidden;display:flex;flex-direction:column}.cat img{width:100%;height:150px;object-fit:cover;object-position:top;display:block}.cat div{padding:8px 10px;display:flex;flex-direction:column;gap:6px}.cat b{font-size:14px}.cat .cb{display:flex;flex-direction:row;gap:6px}.cat .cb button,.cat .cb a{flex:1;height:36px;border-radius:9px;border:1.5px solid #00606B;background:#fff;color:#00606B;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;text-decoration:none;cursor:pointer;min-width:0}.cat .cb .p{background:#00606B;color:#fff}.n{font-size:13px;color:#44575C}.t{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:#14262A;color:#fff;padding:10px 16px;border-radius:10px;display:none}
 </style></head><body><div class="w">
 <h1>Busca Makita</h1>
 <input id="q" placeholder="Digite o código (ex.: DHR242RFE)" autocomplete="off" autocapitalize="characters">
+<div id="cats" class="cats"></div>
 <div id="off" class="n"><button id="offb" style="height:40px;border:1.5px solid #00606B;background:#fff;color:#00606B;border-radius:10px;font-weight:700;padding:0 14px;cursor:pointer">Salvar para usar offline</button> <span id="offs"></span></div>
 <div id="out" class="list"></div></div><div class="t" id="t"></div>
 <script src="fichas.js"></script>
@@ -27,7 +28,7 @@ const N=s=>(s||'').toUpperCase().replace(/[^A-Z0-9]/g,'');
 const IDX=[];D.forEach((it,i)=>it.c.forEach(([c,l])=>IDX.push({k:N(c),c,l,i})));
 const $=id=>document.getElementById(id),out=$('out');let cur=null;
 function toast(m){const t=$('t');t.textContent=m;t.style.display='block';setTimeout(()=>t.style.display='none',2200)}
-function search(){const q=N($('q').value);cur=null;if(!q){out.innerHTML='<div class="n">Digite parte do código. '+D.length+' itens.</div>';return}
+function search(){const q=N($('q').value);cur=null;$('cats').style.display=q?'none':'grid';if(!q){out.innerHTML='<div class="n">Digite parte do código. '+D.length+' itens.</div>';return}
  const ex=IDX.filter(x=>x.k===q);const exi=[...new Set(ex.map(x=>x.i))];if(exi.length===1){show(ex[0]);return}
  const seen=new Set(),res=[];for(const x of (exi.length?ex:IDX)){if(x.k.includes(q)&&!seen.has(x.i+x.k)){seen.add(x.i+x.k);res.push(x)}if(res.length>=40)break}
  out.innerHTML=res.length?'':'<div class="n">Nada encontrado.</div>';
@@ -57,12 +58,18 @@ async function share(){const {it,code,link}=cur;const text=code+(link?'\n'+link:
    if(navigator.canShare&&navigator.canShare({files:fs})){await navigator.share({files:fs,text,title:code});return}}catch(e){if(e&&e.name==='AbortError')return}
  try{if(navigator.share){await navigator.share({title:code,text:code,url:link||undefined});return}}catch(e){if(e.name==='AbortError')return}
  try{await navigator.clipboard.writeText(text);toast('Texto copiado')}catch(e){prompt('Copie:',text)}}
-$('q').addEventListener('input',search);search();
+$('q').addEventListener('input',search);
+const CATS=[['Catálogo de Produtos 2026','https://www.makita.com.br/catalogosRegistra.asp?cod=2&tp=o','crops/capa_produtos.webp'],['Catálogo de Acessórios 2026','https://www.makita.com.br/catalogosRegistra.asp?cod=4&tp=o','crops/capa_acessorios.webp']];
+CATS.forEach(([t,u,img])=>{const d=document.createElement('div');d.className='cat';d.innerHTML='<a target="_blank" rel="noopener"><img alt=""></a><div><b></b><div class="cb"><button class="p">Enviar</button><a target="_blank" rel="noopener">Abrir</a></div></div>';
+ d.querySelector('b').textContent=t;d.querySelector('img').src=img;d.querySelector('img').alt='Capa do '+t;d.querySelector('a').href=u;d.querySelector('.cb a').href=u;
+ d.querySelector('.p').onclick=async()=>{try{if(navigator.share){await navigator.share({title:t,text:t,url:u});return}}catch(e){if(e&&e.name==='AbortError')return}try{await navigator.clipboard.writeText(t+'\n'+u);toast('Link copiado')}catch(e){prompt('Copie:',u)}};
+ $('cats').appendChild(d)});
+search();
 if('serviceWorker' in navigator&&location.protocol!=='file:'){navigator.serviceWorker.register('sw.js').catch(()=>{})}
 else{$('off').style.display='none'}
 try{if(localStorage.getItem('offlineOk')){$('offs').textContent='✓ salvo neste aparelho'}}catch(e){}
 $('offb').onclick=async()=>{const b=$('offb'),s=$('offs');b.disabled=true;
- try{const c=await caches.open('busca-makita-v1');const urls=['index.html','fichas.js'];
+ try{const c=await caches.open('busca-makita-v1');const urls=['index.html','fichas.js','crops/capa_produtos.webp','crops/capa_acessorios.webp'];
   D.forEach(it=>{if(it.f){urls.push('crops/'+it.f);if(it.f2)urls.push('crops/'+it.f2)}else it.c.forEach((x,i)=>{if(i===0)urls.push('fotos/'+N(x[0])+'.jpg')})});
   let ok=0,i=0;const q=[...urls];async function w(){while(q.length){const u=q.shift();try{if(!(await c.match(u))){const r=await fetch(u);if(r.ok)await c.put(u,r)}}catch(e){}ok++;if(++i%20===0)s.textContent=i+'/'+urls.length}}
   await Promise.all([w(),w(),w(),w()]);s.textContent='✓ salvo neste aparelho';try{localStorage.setItem('offlineOk','1')}catch(e){}
